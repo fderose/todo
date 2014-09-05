@@ -25,20 +25,20 @@ public class ToDoResource {
   }
 
   /*
-   Adds or updates a messge.
+   Adds or updates an item.
    It might be better if I divided adds and updates so that adds
    were handled by a POST and updates were handled by a PUT. Dunno.
    */
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public ToDoItem putIt(ToDoItem todoItem) {
-    if (todoItem.getId() < 0) {
-      todoItem.setId(ID_GENERATOR.getAndIncrement());
+  public Response putIt(ToDoItem item) {
+    if (item.getId() < 0) {
+      item.setId(ID_GENERATOR.getAndIncrement());
     }
-    db.put(todoItem.getId(), todoItem);
-    new Searchly().addDocument(todoItem);
-    return todoItem;
+    db.put(item.getId(), item);
+    new Searchly().addDocument(item);
+    return Response.ok().entity(item).build();
   }
 
   /*
@@ -53,16 +53,16 @@ public class ToDoResource {
   }
 
   /*
-   Update an item so that it is marked as done and send a message to my iPhone.
+   Update an item so that it is marked as done and send a message to a phone.
    */
   @PUT
   @Path("/done")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public ToDoItem putDone(ToDoItem inputItem) {
-    ToDoItem outputItem = putIt(inputItem);
-    new Twilio().sendMessage("The following item is done: " + outputItem.toString());
-    return outputItem;
+  public Response putDone(ToDoItem item1) {
+    Response response = putIt(item1);
+    new Twilio().sendMessage("The following item is done:\n " + item1);
+    return response;
   }
 
   /*
@@ -71,8 +71,8 @@ public class ToDoResource {
   @GET
   @Path("/byid")
   @Produces(MediaType.APPLICATION_JSON)
-  public ToDoItem getById(@QueryParam("id") int id) {
-    return db.get(id);
+  public Response getById(@QueryParam("id") int id) {
+    return Response.ok().entity(db.get(id)).build();
   }
 
   /*
@@ -81,8 +81,8 @@ public class ToDoResource {
   @GET
   @Path("/all")
   @Produces(MediaType.APPLICATION_JSON)
-  public ArrayList<ToDoItem> getAll() {
-    return new ArrayList(db.values());
+  public Response getAll() {
+    return Response.ok().entity(new ArrayList(db.values())).build();
   }
 
   /*
@@ -91,7 +91,7 @@ public class ToDoResource {
   @GET
   @Path("/search")
   @Produces(MediaType.APPLICATION_JSON)
-  public ArrayList<ToDoItem> search(@QueryParam("term") String term) {
-    return new Searchly().search(term, db);
+  public Response search(@QueryParam("term") String term) {
+    return Response.ok().entity(new Searchly().search(term, db)).build();
   }
 }

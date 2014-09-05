@@ -5,6 +5,7 @@ import com.twilio.sdk.TwilioRestException;
 import com.twilio.sdk.resource.factory.SmsFactory;
 import com.twilio.sdk.resource.instance.Sms;
 
+import javax.ws.rs.WebApplicationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,11 @@ class Twilio {
     TwilioRestClient client = new TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN);
 
     Map<String, String> params = new HashMap<>();
-    params.put("To", "+15105890752");
+    String donePhone = System.getProperty("donePhone");
+    if (donePhone == null) {
+      throw new WebApplicationException("System property \"donePhone\" must be set (for example -DdonePhone=+15105890752");
+    }
+    params.put("To", donePhone);
     params.put("From", "+15103984486");
     params.put("Body", message);
 
@@ -27,16 +32,8 @@ class Twilio {
       sms = messageFactory.create(params);
     } catch (TwilioRestException e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new WebApplicationException(e);
     }
     System.out.println(String.format("SMS message sent with sid = %s and status = %s.", sms.getSid(), sms.getStatus()));
   }
-
-//  public static void main(String[] args) {
-//    try {
-//      new Twilio().sendMessage("Yo Beavis");
-//    } catch (TwilioRestException e) {
-//      e.printStackTrace();
-//    }
-//  }
 }

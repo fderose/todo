@@ -12,6 +12,7 @@ import io.searchbox.core.Search;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.DeleteIndex;
 
+import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ class Searchly {
       jestClient.execute(new CreateIndex.Builder("todoitems").build());
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new WebApplicationException(e);
     }
   }
 
@@ -40,7 +41,7 @@ class Searchly {
       jestClient.execute(new Index.Builder(todoItem).index("todoitems").type("todoitem").id(String.valueOf(todoItem.getId())).build());
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new WebApplicationException(e);
     }
   }
 
@@ -62,7 +63,7 @@ class Searchly {
       result = jestClient.execute(search);
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new WebApplicationException(e);
     }
     JsonObject jsonObject = result.getJsonObject();
     ArrayList arrayList = new ArrayList<ToDoItem>();
@@ -82,7 +83,7 @@ class Searchly {
     try {
       jestClient.execute(new Delete.Builder(String.valueOf(id)).index("todoitems").type("todoitem").build());
     } catch (Exception e) {
-      e.printStackTrace();
+      throw new WebApplicationException(e);
     }
   }
 }

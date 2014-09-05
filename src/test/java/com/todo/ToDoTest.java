@@ -34,9 +34,17 @@ public class ToDoTest {
   }
 
   // Helper functions
+  private void checkStatus(Response response) {
+    if (response.getStatus() != 200) {
+      System.out.println(response.getStatusInfo().getReasonPhrase());
+    }
+    assertEquals(response.getStatusInfo().getReasonPhrase() + " - ", 200, response.getStatus());
+  }
+
   private ToDoItem putOne(ToDoItem todoItem, String path) {
     Entity<ToDoItem> entity = Entity.json(todoItem);
     Response response = target.path(path).request().put(entity);
+    checkStatus(response);
     return response.readEntity(ToDoItem.class);
   }
 
@@ -77,8 +85,9 @@ public class ToDoTest {
   @Test
   public void testGetById() {
     int id = putOne(new ToDoItem(-1, "Lawn", "Mow the lawn.")).getId();
-    ToDoItem outputItem = target.path("todo/byid").queryParam("id", id).request().get(ToDoItem.class);
-    assertEquals(id, outputItem.getId());
+    Response response = target.path("todo/byid").queryParam("id", id).request().get(Response.class);
+    checkStatus(response);
+    assertEquals(id, response.readEntity(ToDoItem.class).getId());
   }
 
   /**
@@ -90,7 +99,9 @@ public class ToDoTest {
     inputSet.add(putOne(new ToDoItem(-1, "Lawn", "Mow the lawn.")));
     inputSet.add(putOne(new ToDoItem(-1, "Clean", "Clean the dang house!")));
     inputSet.add(putOne(new ToDoItem(-1, "Pay", "Pay all the bills!")));
-    List<Map<String, Object>> items = target.path("todo/all").request().get(ArrayList.class);
+    Response response = target.path("todo/all").request().get(Response.class);
+    checkStatus(response);
+    List<Map<String, Object>> items = response.readEntity(ArrayList.class);
     Set<ToDoItem> outputSet = new HashSet<>();
     for (Map<String, Object> map : items) {
       int id = (Integer) map.get("id");
@@ -116,7 +127,9 @@ public class ToDoTest {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    List<Map<String, Object>> items = target.path("todo/search").queryParam("term", "lawn").request().get(ArrayList.class);
+    Response response = target.path("todo/search").queryParam("term", "lawn").request().get(Response.class);
+    assertEquals(response.getStatus(), 200);
+    List<Map<String, Object>> items = response.readEntity(ArrayList.class);
     Set<ToDoItem> outputSet = new HashSet<>();
     for (Map<String, Object> map : items) {
       int id = (Integer) map.get("id");
@@ -135,11 +148,14 @@ public class ToDoTest {
   public void testSetDone() {
     int fingerprint = new Random().nextInt();
     System.out.println(String.format("Running testSetDone with fingerprint %s", String.valueOf(fingerprint)));
-    ToDoItem outputItem = putOne(new ToDoItem(-1, "Lawn", String.format("Mow the lawn. (%s)", String.valueOf(fingerprint))));
-    outputItem.setDone(true);
-    putOne(outputItem, "todo/done");
-    outputItem = target.path("todo/byid").queryParam("id", outputItem.getId()).request().get(ToDoItem.class);
-    assertEquals(outputItem.getDone(), true);
+    ToDoItem item1 = putOne(new ToDoItem(-1, "Lawn", String.format("Mow the lawn. (%s)", String.valueOf(fingerprint))));
+    item1.setDone(true);
+    putOne(item1, "todo/done");
+    Response response = target.path("todo/byid").queryParam("id", item1.getId()).request().get(Response.class);
+    checkStatus(response);
+    ToDoItem item2 = response.readEntity(ToDoItem.class);
+    assertTrue(item1.equals(item2));
+    assertTrue(item2.getDone());
   }
 
   /**
@@ -149,8 +165,9 @@ public class ToDoTest {
   public void testDelete() {
     ToDoItem outputItem = putOne(new ToDoItem(-1, "Lawn", "Mow the lawn."));
     Response response = target.path("todo").queryParam("id", outputItem.getId()).request().delete();
-    assertEquals(response.getStatus(), 200);
-    outputItem = target.path("todo/byid").queryParam("id", outputItem.getId()).request().get(ToDoItem.class);
-    assertNull(outputItem);
+    checkStatus(response);
+    response = target.path("todo/byid").queryParam("id", outputItem.getId()).request().get(Response.class);
+    checkStatus(response);
+    assertNull(response.readEntity(ToDoItem.class));
   }
 }
