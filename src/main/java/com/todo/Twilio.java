@@ -14,14 +14,19 @@ class Twilio {
   private static final String ACCOUNT_SID = "ACac0b5cb930c8c535c830dea4bbd55a89";
   private static final String AUTH_TOKEN = "8bc7efc8d8714339887d612ee5374cbc";
 
+  private String donePhone;
+
+  Twilio() {
+    donePhone = System.getProperty("donePhone");
+    if (donePhone == null) {
+      throw new WebApplicationException("System property \"donePhone\" must be set (for example -DdonePhone=+15105890752");
+    }
+  }
+
   void sendMessage(String message) {
     TwilioRestClient client = new TwilioRestClient(ACCOUNT_SID, AUTH_TOKEN);
 
     Map<String, String> params = new HashMap<>();
-    String donePhone = System.getProperty("donePhone");
-    if (donePhone == null) {
-      throw new WebApplicationException("System property \"donePhone\" must be set (for example -DdonePhone=+15105890752");
-    }
     params.put("To", donePhone);
     params.put("From", "+15103984486");
     params.put("Body", message);

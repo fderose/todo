@@ -19,12 +19,20 @@ public class ToDoTest {
 
   private HttpServer server;
   private WebTarget target;
+  private double boost;
+
+  private static final double EPSILON = 0.01;
 
   @Before
   public void setUp() throws Exception {
     server = Main.startServer();
     Client c = ClientBuilder.newClient().register(JacksonJsonProvider.class);
     target = c.target(Main.BASE_URI);
+    String prop = System.getProperty("boost");
+    if (prop == null) {
+      throw new Exception("System property \"boost\" must be set to a value >= 1.0 (for example -Dboost=3.3");
+    }
+    boost = Double.parseDouble(prop);
     ToDoResource.initialize();
   }
 
@@ -119,25 +127,26 @@ public class ToDoTest {
   @Test
   public void search() {
     Set<ToDoItem> inputSet = new HashSet<>();
-    inputSet.add(putOne(new ToDoItem(-1, "Lawn", "Mow the lawn.")));
-    inputSet.add(putOne(new ToDoItem(-1, "Weed", "Weed the lawn!")));
+    inputSet.add(putOne(new ToDoItem(-1, "Weed the lawn", "Do it now!")));
+    inputSet.add(putOne(new ToDoItem(-1, "Do it now!", "Weed the lawn.")));
     // Give index time to be updated
     try {
       Thread.sleep(3000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    Response response = target.path("todo/search").queryParam("term", "lawn").request().get(Response.class);
+    Response response = target.path("todo/search").queryParam("term", "lawn").queryParam("boost", boost).request().get(Response.class);
     assertEquals(response.getStatus(), 200);
     List<Map<String, Object>> items = response.readEntity(ArrayList.class);
+    assertEquals(items.size(), 2);
+    double[] scores = new double[2];
     Set<ToDoItem> outputSet = new HashSet<>();
+    int i = 0;
     for (Map<String, Object> map : items) {
-      int id = (Integer) map.get("id");
-      String title = (String) map.get("title");
-      String body = (String) map.get("body");
-      ToDoItem item = new ToDoItem(id, title, body);
-      outputSet.add(item);
+      outputSet.add(new ToDoItem((Map)map.get("todoItem")));
+      scores[i++] = (Double)map.get("score");
     }
+    assertTrue(Math.abs(scores[0] - scores[1] * boost) < EPSILON);
     compareInputSetToOutputSet(inputSet, outputSet);
   }
 

@@ -45,18 +45,19 @@ class Searchly {
     }
   }
 
-  ArrayList<ToDoItem> search(String term, Map<Integer, ToDoItem> db) {
+  ArrayList<ScoredToDoItem> search(String term, double boost, Map<Integer, ToDoItem> db) {
     String query = String.format("{\n" +
       "    \"query\": {\n" +
       "        \"filtered\" : {\n" +
       "            \"query\" : {\n" +
       "                \"query_string\" : {\n" +
+      "                    \"fields\" : [\"title^%.1f\", \"body\"],\n" +
       "                    \"query\" : \"%s\"\n" +
       "                }\n" +
       "            }\n" +
       "        }\n" +
       "    }\n" +
-      "}", term);
+      "}", boost, term);
     Search search = new Search.Builder(query).build();
     JestResult result = null;
     try {
@@ -66,14 +67,14 @@ class Searchly {
       throw new WebApplicationException(e);
     }
     JsonObject jsonObject = result.getJsonObject();
-    ArrayList arrayList = new ArrayList<ToDoItem>();
+    ArrayList<ScoredToDoItem> arrayList = new ArrayList<>();
     int numHits = jsonObject.get("hits").getAsJsonObject().get("total").getAsInt();
     if (numHits > 0) {
       JsonArray jsonArray = jsonObject.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
       for (int i = 0; i < numHits; i++) {
         JsonObject hit = jsonArray.get(i).getAsJsonObject().get("_source").getAsJsonObject();
         ToDoItem todoItem = db.get(hit.get("id").getAsInt());
-        arrayList.add(todoItem);
+        arrayList.add(new ScoredToDoItem(todoItem, jsonArray.get(i).getAsJsonObject().get("_score").getAsDouble()));
       }
     }
     return arrayList;

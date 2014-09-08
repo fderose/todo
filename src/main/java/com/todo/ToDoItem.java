@@ -1,5 +1,7 @@
 package com.todo;
 
+import java.util.Map;
+
 public class ToDoItem {
 
 
@@ -28,14 +30,6 @@ public class ToDoItem {
     this.id = id;
   }
 
-  public void setTitle(String title) {
-    this.title = title;
-  }
-
-  public void setBody(String body) {
-    this.body = body;
-  }
-
   public void setDone(boolean done) {
     this.done = done;
   }
@@ -48,6 +42,13 @@ public class ToDoItem {
     this.title = title;
     this.body = body;
     this.done = false;
+  }
+
+  public ToDoItem(Map<Object, Object> map) {
+    id = (Integer) map.get("id");
+    title = (String) map.get("title");
+    body = (String) map.get("body");
+    done = (boolean) map.get("done");
   }
 
   @Override

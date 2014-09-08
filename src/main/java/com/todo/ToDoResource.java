@@ -19,6 +19,7 @@ public class ToDoResource {
       ID_GENERATOR.set(1);
       db.clear();
       new Searchly().initialize();
+      new Twilio();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -91,7 +92,7 @@ public class ToDoResource {
   @GET
   @Path("/search")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response search(@QueryParam("term") String term) {
-    return Response.ok().entity(new Searchly().search(term, db)).build();
+  public Response search(@QueryParam("term") String term, @QueryParam("boost") double boost) {
+    return Response.ok().entity(new Searchly().search(term, boost, db)).build();
   }
 }
