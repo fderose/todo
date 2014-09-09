@@ -19,7 +19,7 @@ class Twilio {
   Twilio() {
     donePhone = System.getProperty("donePhone");
     if (donePhone == null) {
-      throw new WebApplicationException("System property \"donePhone\" must be set (for example -DdonePhone=+15105890752");
+      throw new RuntimeException("System property \"donePhone\" must be set (for example -DdonePhone=+15105890752");
     }
   }
 

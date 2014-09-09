@@ -32,7 +32,7 @@ class Searchly {
       jestClient.execute(new CreateIndex.Builder("todoitems").build());
     } catch (Exception e) {
       e.printStackTrace();
-      throw new WebApplicationException(e);
+      throw new RuntimeException(e);
     }
   }
 

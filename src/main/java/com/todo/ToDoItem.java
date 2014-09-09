@@ -1,5 +1,7 @@
 package com.todo;
 
+import com.mongodb.DBObject;
+
 import java.util.Map;
 
 public class ToDoItem {
@@ -49,6 +51,13 @@ public class ToDoItem {
     title = (String) map.get("title");
     body = (String) map.get("body");
     done = (boolean) map.get("done");
+  }
+
+  public ToDoItem(DBObject dbObject) {
+    id = (Integer) dbObject.get("id");
+    title = (String) dbObject.get("title");
+    body = (String) dbObject.get("body");
+    done = (boolean) dbObject.get("done");
   }
 
   @Override

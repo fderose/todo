@@ -1,27 +1,35 @@
 package com.todo;
 
-import com.todo.db.HashMapDb;
+import com.todo.db.DatabaseManager;
 import com.todo.db.IDatabase;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Path("todo")
 public class ToDoResource {
 
   private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
-  private static final IDatabase<ToDoItem> db = new HashMapDb<>(new HashMap<Integer, ToDoItem>());
+  private static IDatabase<ToDoItem> db;
 
   public static void initialize() {
     try {
       ID_GENERATOR.set(1);
+      db = DatabaseManager.getDatabaseInstance();
       db.clear();
       new Searchly().initialize();
       new Twilio();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void shutdown() {
+    try {
+      db.close();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

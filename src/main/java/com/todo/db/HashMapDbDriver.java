@@ -3,14 +3,13 @@ package com.todo.db;
 import java.util.Collection;
 import java.util.Map;
 
-public class HashMapDb<T> implements IDatabase<T> {
+public class HashMapDbDriver<T> implements IDatabase<T> {
 
   private final Map<Integer, T> db;
 
-  public HashMapDb(Map<Integer, T> map) {
+  public HashMapDbDriver(Map<Integer, T> map) {
     db = map;
   }
-
 
   @Override
   public void clear() {
@@ -35,5 +34,9 @@ public class HashMapDb<T> implements IDatabase<T> {
   @Override
   public void remove(Integer id) {
     db.remove(id);
+  }
+
+  @Override
+  public void close() {
   }
 }

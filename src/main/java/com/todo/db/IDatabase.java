@@ -13,4 +13,6 @@ public interface IDatabase<T> {
 
   void remove(Integer id);
 
+  void close();
+
 }

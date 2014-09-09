@@ -30,7 +30,7 @@ public class ToDoTest {
     target = c.target(Main.BASE_URI);
     String prop = System.getProperty("boost");
     if (prop == null) {
-      throw new Exception("System property \"boost\" must be set to a value >= 1.0 (for example -Dboost=3.3");
+      throw new RuntimeException("System property \"boost\" must be set to a value >= 1.0 (for example -Dboost=3.3");
     }
     boost = Double.parseDouble(prop);
     ToDoResource.initialize();
@@ -38,6 +38,7 @@ public class ToDoTest {
 
   @After
   public void tearDown() throws Exception {
+    ToDoResource.shutdown();
     server.stop();
   }
 
