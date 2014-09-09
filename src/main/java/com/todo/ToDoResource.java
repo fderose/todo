@@ -1,18 +1,20 @@
 package com.todo;
 
+import com.todo.db.HashMapDb;
+import com.todo.db.IDatabase;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Path("todo")
 public class ToDoResource {
 
   private static final AtomicInteger ID_GENERATOR = new AtomicInteger(1);
-  private static final Map<Integer, ToDoItem> db = new HashMap<>();
+  private static final IDatabase<ToDoItem> db = new HashMapDb<>(new HashMap<Integer, ToDoItem>());
 
   public static void initialize() {
     try {
@@ -73,7 +75,7 @@ public class ToDoResource {
   @Path("/byid")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getById(@QueryParam("id") int id) {
-    return Response.ok().entity(db.get(id)).build();
+    return Response.ok().entity(db.getById(id)).build();
   }
 
   /*
@@ -83,7 +85,7 @@ public class ToDoResource {
   @Path("/all")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAll() {
-    return Response.ok().entity(new ArrayList(db.values())).build();
+    return Response.ok().entity(new ArrayList(db.getAll())).build();
   }
 
   /*

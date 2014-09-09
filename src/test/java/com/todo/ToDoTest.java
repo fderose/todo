@@ -143,8 +143,8 @@ public class ToDoTest {
     Set<ToDoItem> outputSet = new HashSet<>();
     int i = 0;
     for (Map<String, Object> map : items) {
-      outputSet.add(new ToDoItem((Map)map.get("todoItem")));
-      scores[i++] = (Double)map.get("score");
+      outputSet.add(new ToDoItem((Map) map.get("todoItem")));
+      scores[i++] = (Double) map.get("score");
     }
     assertTrue(Math.abs(scores[0] - scores[1] * boost) < EPSILON);
     compareInputSetToOutputSet(inputSet, outputSet);

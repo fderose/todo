@@ -2,6 +2,7 @@ package com.todo;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.todo.db.IDatabase;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.JestResult;
@@ -14,7 +15,6 @@ import io.searchbox.indices.DeleteIndex;
 
 import javax.ws.rs.WebApplicationException;
 import java.util.ArrayList;
-import java.util.Map;
 
 class Searchly {
   private final JestClient jestClient;
@@ -45,7 +45,7 @@ class Searchly {
     }
   }
 
-  ArrayList<ScoredToDoItem> search(String term, double boost, Map<Integer, ToDoItem> db) {
+  ArrayList<ScoredToDoItem> search(String term, double boost, IDatabase<ToDoItem> db) {
     String query = String.format("{\n" +
       "    \"query\": {\n" +
       "        \"filtered\" : {\n" +
@@ -73,7 +73,7 @@ class Searchly {
       JsonArray jsonArray = jsonObject.get("hits").getAsJsonObject().get("hits").getAsJsonArray();
       for (int i = 0; i < numHits; i++) {
         JsonObject hit = jsonArray.get(i).getAsJsonObject().get("_source").getAsJsonObject();
-        ToDoItem todoItem = db.get(hit.get("id").getAsInt());
+        ToDoItem todoItem = db.getById(hit.get("id").getAsInt());
         arrayList.add(new ScoredToDoItem(todoItem, jsonArray.get(i).getAsJsonObject().get("_score").getAsDouble()));
       }
     }
